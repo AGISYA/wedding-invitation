@@ -7,7 +7,6 @@ export function FloatingMusic() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
-  const [audioLoaded, setAudioLoaded] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // Fallback audio URLs that are known to work
@@ -16,49 +15,6 @@ export function FloatingMusic() {
     "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
     "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
   ];
-
-  useEffect(() => {
-    // Show the music control after a delay
-    const timer = setTimeout(() => {
-      setIsVisible(true);
-    }, 3000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  useEffect(() => {
-    // Create audio element programmatically
-    const audio = new Audio();
-    audio.id = "background-music";
-    audio.loop = true;
-    audio.volume = 0.5; // Set initial volume to 50%
-
-    // Set event listeners
-    audio.addEventListener("canplaythrough", () => {
-      console.log("Audio loaded successfully");
-      setAudioLoaded(true);
-    });
-
-    audio.addEventListener("error", (e) => {
-      console.error("Audio error details:", getAudioErrorMessage(audio));
-
-      // Try to use a fallback URL
-      tryFallbackAudio(audio);
-    });
-
-    // Try to load the primary audio file first
-    audio.src = FALLBACK_AUDIO_URLS[0]; // Use the first fallback URL directly
-    audioRef.current = audio;
-
-    return () => {
-      // Clean up
-      if (audioRef.current) {
-        audioRef.current.pause();
-        audioRef.current.src = "";
-        audioRef.current.remove();
-      }
-    };
-  }, []);
 
   // Helper function to get detailed error information
   const getAudioErrorMessage = (audio: HTMLAudioElement): string => {
@@ -99,6 +55,49 @@ export function FloatingMusic() {
     }
   };
 
+  useEffect(() => {
+    // Show the music control after a delay
+    const timer = setTimeout(() => {
+      setIsVisible(true);
+    }, 3000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    // Create audio element programmatically
+    const audio = new Audio();
+    audio.id = "background-music";
+    audio.loop = true;
+    audio.volume = 0.5; // Set initial volume to 50%
+
+    // Set event listeners
+    audio.addEventListener("canplaythrough", () => {
+      console.log("Audio loaded successfully");
+    });
+
+    audio.addEventListener("error", () => {
+      console.error("Audio error details:", getAudioErrorMessage(audio));
+
+      // Try to use a fallback URL
+      tryFallbackAudio(audio);
+    });
+
+    // Try to load the primary audio file first
+    audio.src = FALLBACK_AUDIO_URLS[0]; // Use the first fallback URL directly
+    audioRef.current = audio;
+
+    return () => {
+      // Clean up
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current.src = "";
+        audioRef.current.remove();
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const togglePlay = () => {
     const audio = audioRef.current;
 
@@ -119,10 +118,10 @@ export function FloatingMusic() {
           .then(() => {
             setIsPlaying(true);
           })
-          .catch((e) => {
+          .catch((error) => {
             console.log(
               "Audio play was prevented:",
-              e.message || "Unknown error"
+              error.message || "Unknown error"
             );
             setIsPlaying(false);
           });

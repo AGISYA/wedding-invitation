@@ -155,7 +155,7 @@ export function Wishes() {
             className="md:col-span-3"
           >
             <div className="bg-white rounded-lg shadow-md border border-gray-100 h-[300px] sm:h-[400px] overflow-y-auto p-4">
-              {wishes.map((wish, index) => (
+              {wishes.map((wish) => (
                 <div
                   key={wish.id}
                   className="mb-4 pb-4 border-b border-gray-100 last:border-0"
